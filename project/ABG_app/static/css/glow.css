@@ -1,0 +1,10 @@
+/* Default shadow */
+.shadow-md {
+    box-shadow: 0 4px 6px rgba(175, 30, 30, 0.1);
+}
+
+/* Glowing shadow on hover */
+.hover\:shadow-glow:hover {
+    box-shadow: 0 4px 6px rgba(204, 186, 186, 0.1), 0 0 20px rgb(25, 0, 255);
+    /* Adjust the color and size as needed */
+}

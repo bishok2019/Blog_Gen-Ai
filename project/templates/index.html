@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Blog Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/load_circle.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/glow.css' %}" />
+  </head>
+
+  <body class="bg-black font-sans antialiased">
+    <!-- navbar -->
+    <nav class="bg-black p-4 text-white flex justify-between items-center">
+      <div>
+        <h1 class="text-3xl font-bold">AI Blog Generator⚡</h1>
+      </div>
+      <div>
+        <h2>Welcome, {{ user.username }}</h2>
+        <a href="{% url 'logout' %}" class="hover:underline text-yellow-400 font-bold">Logout</a>
+      </div>
+    </nav>
+    <!-- main section -->
+    <div class="bg-gray flex-grow container mx-auto mt-10 px-4 sm:px-0">
+      <div class="bg-white max-w-3xl mx-auto p-6 rounded-lg shadow-md transition-transform transform hover:scale-105 flex flex-col hover:shadow-glow">
+        <!-- Introduction -->
+        <div class="text-center rounded-lg mt-4">
+          <h2 class="text-2xl font-semibold mb-4">Welcome to AI Blog Generator</h2>
+          <p class="text-black">Generate high-quality blog articles from YouTube Videos using Artificial Intelligence. Simply enter the link to the YouTube video below and let the AI create the content for you!</p>
+        </div>
+        <br /><br />
+        <!-- YouTube Section -->
+        <div>
+          <h2 class="text-xl mb-4 font-semibold">Enter YouTube Video link</h2>
+          <div class="flex space-x-1 mt-4">
+            <input id="youtube-link" type="url" placeholder="Paste YouTube link..." class="flex-grow p-2 border-2 border-black bg-gray-200 rounded-l-md" />
+            <button id="generateBlogButton1" type="button" class="bg-black text-white text-sm p-2 border-2 border-black h-11 rounded-r-md">Generate</button>
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}" />
+          </div>
+        </div>
+        <!-- Section for loading circle -->
+        <div id="loading-circle" class="load" style="display: none;"></div>
+        <!-- Generated Blog Article -->
+        <section id="blogContent" class="mt-10 flex-grow">
+          <h2 class="text-xl mb-4 font-semibold">Generated Blog Article</h2>
+        </section>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const generateBlogButton = document.getElementById('generateBlogButton1')
+      
+        if (generateBlogButton) {
+          generateBlogButton.addEventListener('click', async () => {
+            const youtubeLinkInput = document.getElementById('youtube-link')
+            const blogContent = document.getElementById('blogContent')
+            const csrfTokenInput = document.querySelector('[name=csrfmiddlewaretoken]')
+      
+            if (youtubeLinkInput && youtubeLinkInput.value) {
+              const youtubeLink = youtubeLinkInput.value
+      
+              document.getElementById('loading-circle').style.display = 'block'
+              blogContent.innerHTML = '' // Clear previous content
+      
+              const endpointUrl = '/generate-blog'
+      
+              try {
+                const csrfToken = csrfTokenInput ? csrfTokenInput.value : null // Check if csrfTokenInput is not null
+                const response = await fetch(endpointUrl, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                  },
+                  body: JSON.stringify({ link: youtubeLink })
+                })
+      
+                const data = await response.json()
+      
+                if (data.content) {
+                  blogContent.innerHTML = data.content
+                } else {
+                  alert('Failed to generate blog article.')
+                }
+              } catch (error) {
+                console.error('Error occurred:', error)
+                alert('Something went wrong. Please try again later.')
+              }
+      
+              document.getElementById('loading-circle').style.display = 'none'
+            } else {
+              alert('Please enter a YouTube link.')
+            }
+          })
+        } else {
+          console.error('Element with ID "generateBlogButton1" not found.')
+        }
+      })
+      
+      function generateBlog() {
+        const link = document.getElementById('link').value
+        fetch('/generate-blog', {
+          method: 'POST',
+          body: JSON.stringify({ link: link }),
+          headers: { 'Content-Type': 'application/json' }
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              // Handle error by displaying a message to the user
+              console.error(data.error)
+              document.getElementById('error-message').innerHTML = data.error
+            } else {
+              // Display the generated blog content
+              document.getElementById('blog-content').innerHTML = data.content
+            }
+          })
+          .catch((error) => {
+            console.error('Error fetching blog content:', error)
+            // Handle network errors or other unexpected issues
+            document.getElementById('error-message').innerHTML = 'Failed to generate blog article.'
+          })
+      }
+    </script>
+
+    <footer class="text-center p-4 text-white mt-6">Powered by &copy; Bishok</footer>
+  </body>
+</html>
