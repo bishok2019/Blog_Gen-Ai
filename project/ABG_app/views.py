@@ -76,13 +76,13 @@ def yt_title(link):
 
 def get_transcription(link):
   audio_file = download_audio(link)
-  aai.settings.api_key = "2eb78d816dd34b9db88e489d92a1def8"
+  aai.settings.api_key = settings.ASSEMBLYAI_API_KEY
   transcriber = aai.transcriber()
   transcript = transcriber.transcribe(audio_file)
   return transcript.text
 
 def generate_blog_from_transcription(transcription):
-  openai.api_key = "sk-proj-Q0dXzuMAjyxaC3o30W62T3BlbkFJndF48OtUhSYkben0Erl5"
+  openai.api_key = settings.OPENAI_API_KEY
   prompt = f"Based on the following transcript from a YouTube video, write a comprehensive blog article, write it based on the transcript, but dont make it look like a youtube video, make it look like a proper blog article:\n\n{transcription}\n\nArticle:"
   
   response = openai.Completion.create(
@@ -92,65 +92,6 @@ def generate_blog_from_transcription(transcription):
   )
   generated_content = response.choices[0].text.strip()
   return generated_content
-# 1111111111111111111111111111111111111111111111
-# def generate_blog(request):
-#     if request.method =='POST':
-#         try:
-#             data = json.loads(request.body)
-#             yt_link = data['link']
-#             # return JsonResponse({'content':yt_link})
-#         except(KeyError,json.JSONDecodeError):
-#             return JsonResponse({'error':'Invalid data sent'}, status=400)
-#         # get yt title
-#         title = yt_title(yt_link)
-
-#         # get transcript
-#         transcription = get_transcription(yt_link)
-#         if not transcription:
-#             return JsonResponse({'error':"Failed to get transcript"}, status=500)
-
-#         # openai = sk-proj-Q0dXzuMAjyxaC3o30W62T3BlbkFJndF48OtUhSYkben0Erl5
-#         blog_content = generate_blog_from_transcription(transcription)
-#         if not blog_content:
-#             return JsonResponse({'error': "Failed to generate blog article"}, status=500)
-        
-#         #save blog article to db
-
-#         # return blog article as response     
-#         return JsonResponse({'content':blog_content})       
-#     else:
-#         return JsonResponse({'error':'Invalid request method'}, status=405)
-
-# def download_audio(link):
-#     yt =YouTube(link)
-#     video = yt.streams.filter(only_audio=True).first()
-#     out_file = video.download(output_path=settings.MEDIA_ROOT)
-#     base,ext = os.path.splitext(out_file)
-#     new_file = base + '.mp3'
-#     return new_file
-# def yt_title(link):
-#     yt =YouTube(link)
-#     title = yt.title
-#     return title
-
-# def get_transcription(link):
-#     audio_file = download_audio(link)
-#     aai.settings.api_key = "2eb78d816dd34b9db88e489d92a1def8"
-#     transcriber = aai.transcriber()
-#     transcript = transcriber.transcribe(audio_file)
-#     return transcript.text
-
-# def generate_blog_from_transcription(transcription):
-#     openai.api_key = "sk-proj-Q0dXzuMAjyxaC3o30W62T3BlbkFJndF48OtUhSYkben0Erl5"
-#     prompt = f"Based on the following transcript from a YouTube video, write a comprehensive blog article, write it based on the transcript, but dont make it look like a youtube video, make it look like a proper blog article:\n\n{transcription}\n\nArticle:"
-    
-#     response = openai.Completion.create(
-#         model = "text-davinci-003",
-#         prompt =prompt,
-#         max_tokens = 1000
-#     )
-#     generated_content = response.choices[0].text.strip()
-#     return generated_content
 
 def user_signup(request):
     if request.method == 'POST':
@@ -184,7 +125,7 @@ def user_signup(request):
             user = User.objects.create_user(username, email, password)
             user.save()
             login(request, user)
-            return redirect('index')  # Assuming 'index' is the name of your home page URL pattern
+            return redirect('index')  
         except Exception as e:
             error_message = f'Error creating account: {str(e)}'
             return render(request, 'signup.html', {'error_message': error_message})
@@ -203,7 +144,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('index')  # Assuming 'index' is the name of your home page URL pattern
+            return redirect('index') 
         else:
             error_message = "Invalid username or password"
             return render(request, 'login.html', {'error_message': error_message})
@@ -213,4 +154,4 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     messages.success(request, "Logged out successfully!")
-    return redirect('login')  # Assuming 'login' is the name of your login page URL pattern
+    return redirect('login')  

@@ -132,3 +132,6 @@ LOGIN_URL ='login'
 MEDIA_URL ='/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+from decouple import config
+OPENAI_API_KEY = config('OPENAI_API_KEY')
+ASSEMBLYAI_API_KEY = config('ASSEMBLYAI_API_KEY')
